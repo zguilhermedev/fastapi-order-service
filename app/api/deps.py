@@ -9,10 +9,12 @@ from app.core.security import decode_access_token
 from app.db.models.user import User
 from app.db.session import get_db_session
 from app.repositories.customer_repository import CustomerRepository
+from app.repositories.order_repository import OrderRepository
 from app.repositories.product_repository import ProductRepository
 from app.repositories.user_repository import UserRepository
 from app.services.auth_service import AuthService
 from app.services.customer_service import CustomerService
+from app.services.order_service import OrderService
 from app.services.product_service import ProductService
 
 DbSession = Annotated[Session, Depends(get_db_session)]
@@ -36,6 +38,22 @@ def get_customer_repository(session: DbSession) -> CustomerRepository:
 def get_customer_service(session: DbSession) -> CustomerService:
     repository = get_customer_repository(session)
     return CustomerService(repository)
+
+
+def get_order_repository(session: DbSession) -> OrderRepository:
+    return OrderRepository(session)
+
+
+def get_order_service(session: DbSession) -> OrderService:
+    order_repository = get_order_repository(session)
+    customer_repository = get_customer_repository(session)
+    product_repository = get_product_repository(session)
+
+    return OrderService(
+        order_repository=order_repository,
+        customer_repository=customer_repository,
+        product_repository=product_repository,
+    )
 
 
 def get_user_repository(session: DbSession) -> UserRepository:
